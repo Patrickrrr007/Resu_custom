@@ -10,6 +10,7 @@ import type { ImprovedResult } from '@/components/common/resume_previewer_contex
 import type { ResumeData } from '@/components/dashboard/resume-component';
 import {
   uploadJobDescriptions,
+  uploadJobFromUrl,
   previewImproveResume,
   confirmImproveResume,
 } from '@/lib/api/resume';
@@ -24,6 +25,7 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 export default function TailorPage() {
   const { t } = useTranslations();
   const [jobDescription, setJobDescription] = useState('');
+  const [jobWebsiteUrl, setJobWebsiteUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [masterResumeId, setMasterResumeId] = useState<string | null>(null);
@@ -138,22 +140,27 @@ export default function TailorPage() {
     }
   };
 
-  const getGenerateValidationError = (trimmedDescription: string) => {
-    if (!trimmedDescription) return null;
+  const getGenerateValidationError = (trimmedDescription: string, trimmedUrl: string) => {
+    const hasUrl = trimmedUrl.length > 0;
+    const hasText = trimmedDescription.length > 0;
+    if (!hasUrl && !hasText) return null;
+    if (hasUrl) return null; // URL flow: no min length for text
     if (trimmedDescription.length < 50) {
       return t('tailor.errors.jobDescriptionTooShort');
     }
     return null;
   };
 
-  const runGenerate = async (resumeId: string, description: string) => {
+  const runGenerate = async (resumeId: string, description: string, fromUrl: string) => {
     try {
-      // 1. Upload Job Description
-      // The API expects an array of strings
-      const jobId = await uploadJobDescriptions([description], resumeId);
-      incrementJobs(); // Update cached counter
+      let jobId: string;
+      if (fromUrl.trim()) {
+        jobId = await uploadJobFromUrl(resumeId, fromUrl.trim());
+      } else {
+        jobId = await uploadJobDescriptions([description], resumeId);
+      }
+      incrementJobs();
 
-      // 2. Preview Resume
       const result = await previewImproveResume(resumeId, jobId, selectedPromptId);
 
       if (!result?.data?.diff_summary || !result?.data?.detailed_changes) {
@@ -196,17 +203,21 @@ export default function TailorPage() {
 
   const handleGenerate = async () => {
     const trimmedDescription = jobDescription.trim();
-    if (!trimmedDescription || !masterResumeId) return;
-    const validationError = getGenerateValidationError(trimmedDescription);
+    const trimmedUrl = jobWebsiteUrl.trim();
+    if (!masterResumeId) return;
+    if (!trimmedDescription && !trimmedUrl) {
+      setError(t('tailor.errors.provideJobSource'));
+      return;
+    }
+    const validationError = getGenerateValidationError(trimmedDescription, trimmedUrl);
     if (validationError) {
       setError(validationError);
       return;
     }
-    const resumeId = masterResumeId;
     setIsLoading(true);
     setError(null);
     try {
-      await runGenerate(resumeId, trimmedDescription);
+      await runGenerate(masterResumeId, trimmedDescription, trimmedUrl);
     } finally {
       setIsLoading(false);
     }
@@ -279,21 +290,24 @@ export default function TailorPage() {
   const handleRegenerateConfirm = async () => {
     setShowRegenerateDialog(false);
     const trimmedDescription = jobDescription.trim();
-    if (!trimmedDescription || !masterResumeId) return;
-    const validationError = getGenerateValidationError(trimmedDescription);
+    const trimmedUrl = jobWebsiteUrl.trim();
+    if (!masterResumeId) return;
+    if (!trimmedDescription && !trimmedUrl) return;
+    const validationError = getGenerateValidationError(trimmedDescription, trimmedUrl);
     if (validationError) {
       setError(validationError);
       return;
     }
-    const resumeId = masterResumeId;
     setIsLoading(true);
     setError(null);
     try {
-      await runGenerate(resumeId, trimmedDescription);
+      await runGenerate(masterResumeId, trimmedDescription, trimmedUrl);
     } finally {
       setIsLoading(false);
     }
   };
+
+  const hasJobInput = jobDescription.trim().length > 0 || jobWebsiteUrl.trim().length > 0;
 
   return (
     <div
@@ -317,7 +331,7 @@ export default function TailorPage() {
           </h1>
           <p className="font-mono text-sm text-blue-700 font-bold uppercase">
             {'// '}
-            {t('tailor.pasteJobDescriptionBelow')}
+            {t('tailor.heroSubtitle')}
           </p>
         </div>
 
@@ -384,10 +398,28 @@ export default function TailorPage() {
             disabled={isLoading || promptLoading}
           />
 
+          <div className="space-y-2">
+            <label className="font-mono text-sm font-bold uppercase tracking-wider text-black block">
+              {t('tailor.jobWebsiteLabel')}
+            </label>
+            <input
+              type="url"
+              placeholder={t('tailor.jobWebsitePlaceholder')}
+              className="w-full font-mono text-sm bg-gray-50 border-2 border-black focus:ring-0 focus:border-blue-700 p-4 rounded-none shadow-inner"
+              value={jobWebsiteUrl}
+              onChange={(e) => setJobWebsiteUrl(e.target.value)}
+              disabled={isLoading}
+            />
+            <p className="font-mono text-xs text-gray-600">{t('tailor.jobWebsiteHint')}</p>
+          </div>
+
           <div className="relative">
+            <label className="font-mono text-sm font-bold uppercase tracking-wider text-black block mb-2">
+              {t('tailor.pasteJobDescriptionBelow')}
+            </label>
             <Textarea
               placeholder={t('tailor.jobDescriptionPlaceholder')}
-              className="min-h-[300px] font-mono text-sm bg-gray-50 border-2 border-black focus:ring-0 focus:border-blue-700 resize-none p-4 rounded-none shadow-inner"
+              className="min-h-[280px] font-mono text-sm bg-gray-50 border-2 border-black focus:ring-0 focus:border-blue-700 resize-none p-4 rounded-none shadow-inner"
               value={jobDescription}
               onChange={(e) => setJobDescription(e.target.value)}
               onKeyDown={handleTextareaKeyDown}
@@ -407,7 +439,7 @@ export default function TailorPage() {
           <Button
             size="lg"
             onClick={handleGenerate}
-            disabled={isLoading || statusLoading || !jobDescription.trim() || !isLlmConfigured}
+            disabled={isLoading || statusLoading || !hasJobInput || !isLlmConfigured}
             className="w-full"
           >
             {isLoading ? (
@@ -438,6 +470,7 @@ export default function TailorPage() {
           onConfirm={handleConfirmChanges}
           diffSummary={pendingResult?.data?.diff_summary}
           detailedChanges={pendingResult?.data?.detailed_changes}
+          improvements={pendingResult?.data?.improvements}
           errorMessage={diffConfirmError ?? undefined}
         />
       )}

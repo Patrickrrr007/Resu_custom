@@ -107,6 +107,7 @@
     "certifications": "資格",
     "languages": "言語",
     "awards": "受賞歴",
+    "creativeTools": "クリエイティブツール",
     "addSection": "セクションを追加",
     "removeSection": "セクションを削除",
     "saveChanges": "変更を保存",
@@ -119,11 +120,15 @@
     },
     "additionalForm": {
       "instructions": "各項目を改行で区切って入力してください（1行につき1項目）。",
+      "columnRatioLabel": "スキル欄の幅（左 / 右）",
+      "columnRatioHint": "スライダーで右欄を広げ、改行を防ぎます。",
+      "columnGapLabel": "欄の間隔（rem）",
       "placeholders": {
         "technicalSkills": "React\nTypeScript\nNode.js",
         "languages": "日本語\n英語",
         "certifications": "AWS Solution Architect\nGoogle Analytics",
-        "awards": "月間MVP\nハッカソン優勝"
+        "awards": "月間MVP\nハッカソン優勝",
+        "creativeTools": "Figma\nAdobe Creative Suite\nBlender"
       }
     },
     "customSections": {
@@ -238,7 +243,8 @@
         "applyFailed": "変更の適用に失敗しました。もう一度お試しください。",
         "resumeChanged": "再生成後に履歴書の内容が変更されました。再生成してからもう一度お試しください。",
         "noChangesToApply": "適用できる変更がありません。",
-        "networkError": "ネットワークエラー。接続を確認してください。"
+        "networkError": "ネットワークエラー。接続を確認してください。",
+        "rateLimit": "レート制限に達しました。しばらく待ってから再試行してください。"
       }
     },
     "jdMatch": {
@@ -489,9 +495,13 @@
     "title": "履歴書をカスタマイズ",
     "subtitle": "特定の求人に合わせて履歴書を最適化",
     "heroTitle": "履歴書をカスタマイズ",
+    "heroSubtitle": "求人内容を貼り付けるか、求人ページのURLを入力",
     "selectResume": "履歴書を選択",
     "pasteJobDescription": "求人内容を貼り付け",
     "pasteJobDescriptionBelow": "下に求人内容を貼り付け",
+    "jobWebsiteLabel": "求人ページのURL",
+    "jobWebsitePlaceholder": "https://example.com/job-posting",
+    "jobWebsiteHint": "ページを取得して求人要件を抽出し、履歴書をカスタマイズして変更案を提示します。",
     "jobDescriptionPlaceholder": "求人内容をここに貼り付けてください...",
     "promptLabel": "調整の強さ",
     "promptDescription": "求人情報にどの程度合わせるかを選択してください。",
@@ -523,6 +533,8 @@
     "diffModal": {
       "title": "AI調整結果の確認",
       "subtitle": "虚偽の情報が追加されていないか、変更内容を慎重に確認してください",
+      "suggestionsTitle": "履歴書の変更提案",
+      "suggestionsDescription": "求人要件に基づき、履歴書をより合わせるための変更案です：",
       "summary": "変更の概要",
       "skillsAdded": "追加されたスキル",
       "skillsRemoved": "削除されたスキル",
@@ -552,6 +564,7 @@
       "confirmLabel": "差分なしで続行"
     },
     "errors": {
+      "provideJobSource": "求人ページのURLを入力するか、求人内容を貼り付けてください。",
       "jobDescriptionTooShort": "求人内容が短すぎます。もう少し詳細を入力してください。",
       "apiKeyError": "API キーのエラーです。設定で LLM 構成を確認してください。",
       "rateLimit": "レート制限に達しました。しばらく待ってから再試行してください。",
@@ -739,6 +752,7 @@
       "certifications": "研修・資格",
       "languages": "言語",
       "awards": "受賞歴",
+      "creativeTools": "クリエイティブツール",
       "links": "リンク"
     },
     "defaults": {
@@ -751,7 +765,8 @@
       "technicalSkills": "技術スキル：",
       "languages": "言語：",
       "certifications": "資格：",
-      "awards": "受賞歴："
+      "awards": "受賞歴：",
+      "creativeTools": "クリエイティブツール："
     }
   },
   "coverLetter": {

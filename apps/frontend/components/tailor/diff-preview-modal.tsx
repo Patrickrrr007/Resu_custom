@@ -10,6 +10,11 @@ import type {
   ResumeFieldDiff,
 } from '@/components/common/resume_previewer_context';
 
+interface ImprovementItem {
+  suggestion: string;
+  lineNumber?: number | null;
+}
+
 interface DiffPreviewModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -17,6 +22,7 @@ interface DiffPreviewModalProps {
   onConfirm: () => void;
   diffSummary?: ResumeDiffSummary;
   detailedChanges?: ResumeFieldDiff[];
+  improvements?: ImprovementItem[];
   errorMessage?: string;
 }
 
@@ -27,11 +33,12 @@ export function DiffPreviewModal({
   onConfirm,
   diffSummary,
   detailedChanges,
+  improvements,
   errorMessage,
 }: DiffPreviewModalProps) {
   const { t } = useTranslations();
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
-    new Set(['summary', 'skills', 'descriptions', 'experience'])
+    new Set(['suggestions', 'summary', 'skills', 'descriptions', 'experience'])
   );
 
   if (!diffSummary || !detailedChanges) {
@@ -168,6 +175,29 @@ export function DiffPreviewModal({
         {errorMessage && (
           <div className="mt-4 border-2 border-red-600 bg-red-50 p-3 font-mono text-xs text-red-700">
             {errorMessage}
+          </div>
+        )}
+
+        {/* Suggestions from job requirements */}
+        {improvements && improvements.length > 0 && (
+          <div className="border-2 border-black bg-white p-4 mt-4">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-3 h-3 bg-[#1D4ED8]"></div>
+              <h3 className="font-mono text-sm font-bold uppercase tracking-wider">
+                {t('tailor.diffModal.suggestionsTitle')}
+              </h3>
+            </div>
+            <p className="font-mono text-xs text-gray-600 mb-3">
+              {t('tailor.diffModal.suggestionsDescription')}
+            </p>
+            <ul className="list-none space-y-2 font-mono text-xs text-black">
+              {improvements.map((item, idx) => (
+                <li key={idx} className="flex gap-2 border-l-2 border-[#1D4ED8] pl-3 py-1">
+                  <span className="text-[#1D4ED8] shrink-0">•</span>
+                  <span>{item.suggestion}</span>
+                </li>
+              ))}
+            </ul>
           </div>
         )}
 

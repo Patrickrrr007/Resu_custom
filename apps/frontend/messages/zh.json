@@ -107,6 +107,7 @@
     "certifications": "证书",
     "languages": "语言能力",
     "awards": "荣誉奖项",
+    "creativeTools": "创意工具",
     "addSection": "添加板块",
     "removeSection": "删除板块",
     "saveChanges": "保存更改",
@@ -119,11 +120,15 @@
     },
     "additionalForm": {
       "instructions": "每行输入一条内容（按 Enter 换行）。",
+      "columnRatioLabel": "技能區塊欄寬（左 / 右）",
+      "columnRatioHint": "拖動滑桿可讓右側欄位變寬，避免文字換行。",
+      "columnGapLabel": "欄位間距（rem）",
       "placeholders": {
         "technicalSkills": "React\nTypeScript\nNode.js",
         "languages": "中文\n英语",
         "certifications": "AWS 解决方案架构师\nGoogle Analytics",
-        "awards": "月度最佳员工\n黑客松冠军"
+        "awards": "月度最佳员工\n黑客松冠军",
+        "creativeTools": "Figma\nAdobe 创意套件\nBlender"
       }
     },
     "customSections": {
@@ -238,7 +243,8 @@
         "applyFailed": "应用变更失败，请重试。",
         "resumeChanged": "简历内容在重新生成后已发生变化。请重新生成后再试。",
         "noChangesToApply": "没有可应用的变更。",
-        "networkError": "网络错误，请检查您的连接。"
+        "networkError": "网络错误，请检查您的连接。",
+        "rateLimit": "触发速率限制，请稍后再试。"
       }
     },
     "jdMatch": {
@@ -489,9 +495,13 @@
     "title": "定制简历",
     "subtitle": "为特定职位优化您的简历",
     "heroTitle": "定制您的简历",
+    "heroSubtitle": "粘贴职位描述或输入职位网址",
     "selectResume": "选择简历",
     "pasteJobDescription": "粘贴职位描述",
     "pasteJobDescriptionBelow": "在下方粘贴职位描述",
+    "jobWebsiteLabel": "职位网址",
+    "jobWebsitePlaceholder": "https://example.com/job-posting",
+    "jobWebsiteHint": "我们会抓取页面并提取职位需求，以定制您的简历并给出修改建议。",
     "jobDescriptionPlaceholder": "在此粘贴职位描述...",
     "promptLabel": "匹配强度",
     "promptDescription": "选择与职位描述对齐的程度。",
@@ -523,6 +533,8 @@
     "diffModal": {
       "title": "审核 AI 定制结果",
       "subtitle": "请仔细检查以下变更，确保不包含虚假内容",
+      "suggestionsTitle": "简历修改建议",
+      "suggestionsDescription": "根据职位需求，我们建议以下修改以更好对齐您的简历：",
       "summary": "变更摘要",
       "skillsAdded": "新增技能",
       "skillsRemoved": "删除技能",
@@ -552,6 +564,7 @@
       "confirmLabel": "继续保存"
     },
     "errors": {
+      "provideJobSource": "请输入职位网址或粘贴职位描述。",
       "jobDescriptionTooShort": "职位描述过短，请提供更多细节。",
       "apiKeyError": "API 密钥错误。请在设置中检查您的 LLM 配置。",
       "rateLimit": "触发速率限制，请稍后再试。",
@@ -739,6 +752,7 @@
       "certifications": "培训与证书",
       "languages": "语言能力",
       "awards": "荣誉奖项",
+      "creativeTools": "创意工具",
       "links": "链接"
     },
     "defaults": {
@@ -751,7 +765,8 @@
       "technicalSkills": "技术技能：",
       "languages": "语言能力：",
       "certifications": "培训与证书：",
-      "awards": "荣誉奖项："
+      "awards": "荣誉奖项：",
+      "creativeTools": "创意工具："
     }
   },
   "coverLetter": {

@@ -46,6 +46,7 @@ interface ProcessedResume {
     languages?: string[];
     certificationsTraining?: string[];
     awards?: string[];
+    creativeTools?: string[];
   };
 }
 
@@ -141,6 +142,28 @@ export async function uploadJobDescriptions(
   });
   if (!res.ok) throw new Error(`Upload failed with status ${res.status}`);
   const data = await res.json();
+  return data.job_id[0];
+}
+
+/** Fetches job posting URL, extracts job description, and uploads it. Returns job_id. */
+export async function uploadJobFromUrl(resumeId: string, url: string): Promise<string> {
+  const res = await apiPost('/jobs/upload-from-url', {
+    resume_id: resumeId,
+    url: url.trim(),
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    try {
+      const body = JSON.parse(text) as { detail?: string };
+      if (typeof body.detail === 'string') throw new Error(body.detail);
+    } catch (e) {
+      if (e instanceof SyntaxError)
+        throw new Error(text || `Upload from URL failed (${res.status})`);
+      throw e;
+    }
+    throw new Error(text || `Upload from URL failed (${res.status})`);
+  }
+  const data = (await res.json()) as { job_id: string[] };
   return data.job_id[0];
 }
 

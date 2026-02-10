@@ -107,6 +107,7 @@
     "certifications": "Certificaciones",
     "languages": "Idiomas",
     "awards": "Premios",
+    "creativeTools": "Herramientas creativas",
     "addSection": "Agregar Sección",
     "removeSection": "Eliminar Sección",
     "saveChanges": "Guardar Cambios",
@@ -119,11 +120,15 @@
     },
     "additionalForm": {
       "instructions": "Introduce elementos separados por saltos de línea (pulsa Enter para cada elemento).",
+      "columnRatioLabel": "Ancho de columnas de Skills (izq. / der.)",
+      "columnRatioHint": "Arrastra para ampliar la columna derecha y evitar saltos de línea.",
+      "columnGapLabel": "Espacio entre columnas (rem)",
       "placeholders": {
         "technicalSkills": "React\nTypeScript\nNode.js",
         "languages": "Español\nInglés",
         "certifications": "AWS Solution Architect\nGoogle Analytics",
-        "awards": "Empleado del mes\nGanador de hackathon"
+        "awards": "Empleado del mes\nGanador de hackathon",
+        "creativeTools": "Figma\nAdobe Creative Suite\nBlender"
       }
     },
     "customSections": {
@@ -238,7 +243,8 @@
         "applyFailed": "No se pudieron aplicar los cambios. Inténtalo de nuevo.",
         "resumeChanged": "El contenido del currículum cambió desde la regeneración. Vuelve a regenerar e inténtalo de nuevo.",
         "noChangesToApply": "No hay cambios para aplicar.",
-        "networkError": "Error de red. Verifica tu conexión."
+        "networkError": "Error de red. Verifica tu conexión.",
+        "rateLimit": "Se alcanzó el límite de tasa. Espera un momento e inténtalo de nuevo."
       }
     },
     "jdMatch": {
@@ -489,9 +495,13 @@
     "title": "Personalizar CV",
     "subtitle": "Optimiza tu currículum para un trabajo específico",
     "heroTitle": "Personaliza tu currículum",
+    "heroSubtitle": "Pega la descripción del trabajo o introduce la URL del anuncio",
     "selectResume": "Seleccionar Currículum",
     "pasteJobDescription": "Pegar Descripción del Trabajo",
     "pasteJobDescriptionBelow": "Pega la descripción del trabajo abajo",
+    "jobWebsiteLabel": "URL del anuncio de trabajo",
+    "jobWebsitePlaceholder": "https://ejemplo.com/anuncio",
+    "jobWebsiteHint": "Obtendremos la página y extraeremos los requisitos para personalizar tu currículum y sugerir cambios.",
     "jobDescriptionPlaceholder": "Pega la descripción del trabajo aquí...",
     "promptLabel": "Intensidad de ajuste",
     "promptDescription": "Elige qué tanto alinear tu currículum con la descripción del puesto.",
@@ -523,6 +533,8 @@
     "diffModal": {
       "title": "Revisar resultados de ajuste de IA",
       "subtitle": "Revisa cuidadosamente los cambios para asegurar que no se haya agregado información falsa",
+      "suggestionsTitle": "Sugerencias para tu currículum",
+      "suggestionsDescription": "Según los requisitos del puesto, te sugerimos estos cambios para alinear mejor tu currículum:",
       "summary": "Resumen de cambios",
       "skillsAdded": "Habilidades agregadas",
       "skillsRemoved": "Habilidades eliminadas",
@@ -552,6 +564,7 @@
       "confirmLabel": "Continuar sin diff"
     },
     "errors": {
+      "provideJobSource": "Introduce la URL del anuncio o pega la descripción del trabajo.",
       "jobDescriptionTooShort": "La descripción del trabajo es demasiado corta. Por favor, proporciona más detalles.",
       "apiKeyError": "Error de clave API. Revisa tu configuración de LLM en Configuración.",
       "rateLimit": "Se alcanzó el límite de tasa. Espera un momento e inténtalo de nuevo.",
@@ -739,6 +752,7 @@
       "certifications": "Formación y Certificaciones",
       "languages": "Idiomas",
       "awards": "Premios",
+      "creativeTools": "Herramientas creativas",
       "links": "Enlaces"
     },
     "defaults": {
@@ -751,7 +765,8 @@
       "technicalSkills": "Habilidades técnicas:",
       "languages": "Idiomas:",
       "certifications": "Certificaciones:",
-      "awards": "Premios:"
+      "awards": "Premios:",
+      "creativeTools": "Herramientas creativas:"
     }
   },
   "coverLetter": {

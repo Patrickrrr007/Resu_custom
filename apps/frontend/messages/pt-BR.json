@@ -107,6 +107,7 @@
     "certifications": "Certificações",
     "languages": "Idiomas",
     "awards": "Prêmios",
+    "creativeTools": "Ferramentas criativas",
     "addSection": "Adicionar Seção",
     "removeSection": "Remover Seção",
     "saveChanges": "Salvar Alterações",
@@ -119,11 +120,15 @@
     },
     "additionalForm": {
       "instructions": "Insira os itens separados por novas linhas (pressione Enter para cada item).",
+      "columnRatioLabel": "Largura das colunas de Skills (esq. / dir.)",
+      "columnRatioHint": "Arraste para ampliar a coluna direita e evitar quebra de linha.",
+      "columnGapLabel": "Espaço entre colunas (rem)",
       "placeholders": {
         "technicalSkills": "React\nTypeScript\nNode.js",
         "languages": "Inglês\nEspanhol",
         "certifications": "AWS Solution Architect\nGoogle Analytics",
-        "awards": "Funcionário do Mês\nVencedor de Hackathon"
+        "awards": "Funcionário do Mês\nVencedor de Hackathon",
+        "creativeTools": "Figma\nAdobe Creative Suite\nBlender"
       }
     },
     "customSections": {
@@ -238,7 +243,8 @@
         "applyFailed": "Falha ao aplicar as alterações. Tente novamente.",
         "resumeChanged": "O conteúdo do currículo mudou desde a regeneração. Regere e tente novamente.",
         "noChangesToApply": "Não há alterações para aplicar.",
-        "networkError": "Erro de rede. Verifique sua conexão."
+        "networkError": "Erro de rede. Verifique sua conexão.",
+        "rateLimit": "Limite de requisições atingido. Por favor, aguarde um momento e tente novamente."
       }
     },
     "jdMatch": {
@@ -489,9 +495,13 @@
     "title": "Personalizar Currículo",
     "subtitle": "Otimize seu currículo para uma vaga específica",
     "heroTitle": "Personalize Seu Currículo",
+    "heroSubtitle": "Cole a descrição da vaga ou insira o link da vaga",
     "selectResume": "Selecionar Currículo",
     "pasteJobDescription": "Colar Descrição da Vaga",
     "pasteJobDescriptionBelow": "Cole a Descrição da Vaga Abaixo",
+    "jobWebsiteLabel": "URL da vaga",
+    "jobWebsitePlaceholder": "https://exemplo.com/vaga",
+    "jobWebsiteHint": "Acessaremos a página e extrairemos os requisitos para personalizar seu currículo e sugerir alterações.",
     "jobDescriptionPlaceholder": "Cole a descrição da vaga aqui...",
     "promptLabel": "Intensidade de personalização",
     "promptDescription": "Escolha o quanto alinhar seu currículo à descrição da vaga.",
@@ -523,6 +533,8 @@
     "diffModal": {
       "title": "Revisar resultados da personalização com IA",
       "subtitle": "Revise cuidadosamente as alterações para garantir que nenhuma informação falsa tenha sido adicionada",
+      "suggestionsTitle": "Sugestões para seu currículo",
+      "suggestionsDescription": "Com base nos requisitos da vaga, sugerimos estas alterações para alinhar melhor seu currículo:",
       "summary": "Resumo das alterações",
       "skillsAdded": "Habilidades adicionadas",
       "skillsRemoved": "Habilidades removidas",
@@ -552,6 +564,7 @@
       "confirmLabel": "Continuar sem diff"
     },
     "errors": {
+      "provideJobSource": "Insira o link da vaga ou cole a descrição da vaga.",
       "jobDescriptionTooShort": "Descrição da vaga muito curta. Por favor, forneça mais detalhes.",
       "apiKeyError": "Erro na chave de API. Verifique sua configuração de LLM em Configurações.",
       "rateLimit": "Limite de requisições atingido. Por favor, aguarde um momento e tente novamente.",
@@ -739,6 +752,7 @@
       "skillsOnly": "Habilidades",
       "languages": "Idiomas",
       "awards": "Prêmios",
+      "creativeTools": "Ferramentas criativas",
       "links": "Links"
     },
     "defaults": {
@@ -751,7 +765,8 @@
       "technicalSkills": "Habilidades Técnicas:",
       "languages": "Idiomas:",
       "certifications": "Certificações:",
-      "awards": "Prêmios:"
+      "awards": "Prêmios:",
+      "creativeTools": "Ferramentas criativas:"
     }
   },
   "coverLetter": {
