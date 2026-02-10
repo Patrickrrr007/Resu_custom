@@ -432,9 +432,16 @@ async def regenerate_items(request: RegenerateRequest) -> RegenerateResponse:
 
     regenerated_items: list[RegeneratedItem] = []
     errors: list[RegenerateItemError] = []
+    any_rate_limit = False
+
+    def _is_rate_limit_error(exc: Exception) -> bool:
+        msg = str(exc).lower()
+        return "429" in str(exc) or "rate limit" in msg or getattr(type(exc), "__name__", "") == "RateLimitError"
 
     for item, result in zip(request.items, results):
         if isinstance(result, Exception):
+            if _is_rate_limit_error(result):
+                any_rate_limit = True
             logger.error(
                 "Failed to regenerate item. "
                 f"resume_id={request.resume_id} item_id={item.item_id} item_type={item.item_type}",
@@ -454,6 +461,11 @@ async def regenerate_items(request: RegenerateRequest) -> RegenerateResponse:
         regenerated_items.append(result)
 
     if not regenerated_items:
+        if any_rate_limit:
+            raise HTTPException(
+                status_code=429,
+                detail="Rate limit reached. Please try again in a moment.",
+            )
         raise HTTPException(
             status_code=500,
             detail="Failed to regenerate content. Please try again.",
@@ -576,17 +588,28 @@ async def apply_regenerated_items(
             expected_title = item.title
             expected_company = item.subtitle
             expected_original_content = item.original_content
+            expected_title_norm = _normalize_match_value(expected_title)
+            expected_company_norm = _normalize_match_value(expected_company)
 
+            # Match by index + title + company; when title+company is unique, allow applying even if description was edited
             resolved_index: int | None = None
             if 0 <= index < len(experiences):
                 entry = experiences[index] if isinstance(experiences[index], dict) else {}
                 entry_title = _normalize_match_value(str(entry.get("title", "")))
                 entry_company = _normalize_match_value(str(entry.get("company", "")))
-                if entry_title == _normalize_match_value(expected_title) and (
-                    not _normalize_match_value(expected_company)
-                    or entry_company == _normalize_match_value(expected_company)
-                ) and _lines_equal(entry.get("description"), expected_original_content):
-                    resolved_index = index
+                if entry_title == expected_title_norm and (
+                    not expected_company_norm or entry_company == expected_company_norm
+                ):
+                    # Use index only if no other entry has same title+company (disambiguate duplicates by content)
+                    same_meta = sum(
+                        1
+                        for e in experiences
+                        if isinstance(e, dict)
+                        and _normalize_match_value(str(e.get("title", ""))) == expected_title_norm
+                        and (not expected_company_norm or _normalize_match_value(str(e.get("company", ""))) == expected_company_norm)
+                    )
+                    if same_meta == 1:
+                        resolved_index = index
 
             if resolved_index is None:
                 resolved_index = _find_unique_index_by_metadata(
@@ -610,9 +633,6 @@ async def apply_regenerated_items(
 
             entry = experiences[resolved_index]
             if isinstance(entry, dict):
-                if not _lines_equal(entry.get("description"), expected_original_content):
-                    apply_failures.append(item_id)
-                    continue
                 entry["description"] = new_content
             else:
                 apply_failures.append(item_id)
@@ -631,17 +651,27 @@ async def apply_regenerated_items(
             expected_name = item.title
             expected_role = item.subtitle
             expected_original_content = item.original_content
+            expected_name_norm = _normalize_match_value(expected_name)
+            expected_role_norm = _normalize_match_value(expected_role)
 
+            # Match by index + name + role; when name+role is unique, allow applying even if description was edited
             resolved_index = None
             if 0 <= index < len(projects):
                 entry = projects[index] if isinstance(projects[index], dict) else {}
                 entry_name = _normalize_match_value(str(entry.get("name", "")))
                 entry_role = _normalize_match_value(str(entry.get("role", "")))
-                if entry_name == _normalize_match_value(expected_name) and (
-                    not _normalize_match_value(expected_role)
-                    or entry_role == _normalize_match_value(expected_role)
-                ) and _lines_equal(entry.get("description"), expected_original_content):
-                    resolved_index = index
+                if entry_name == expected_name_norm and (
+                    not expected_role_norm or entry_role == expected_role_norm
+                ):
+                    same_meta = sum(
+                        1
+                        for p in projects
+                        if isinstance(p, dict)
+                        and _normalize_match_value(str(p.get("name", ""))) == expected_name_norm
+                        and (not expected_role_norm or _normalize_match_value(str(p.get("role", ""))) == expected_role_norm)
+                    )
+                    if same_meta == 1:
+                        resolved_index = index
 
             if resolved_index is None:
                 resolved_index = _find_unique_index_by_metadata(
@@ -665,9 +695,6 @@ async def apply_regenerated_items(
 
             entry = projects[resolved_index]
             if isinstance(entry, dict):
-                if not _lines_equal(entry.get("description"), expected_original_content):
-                    apply_failures.append(item_id)
-                    continue
                 entry["description"] = new_content
             else:
                 apply_failures.append(item_id)

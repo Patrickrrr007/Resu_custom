@@ -133,8 +133,9 @@ async def _render_page_to_pdf(
     pdf_format: str,
     pdf_margins: dict,
 ) -> bytes:
-    await page.goto(url, wait_until="networkidle")
-    await page.wait_for_selector(selector)
+    # 60s timeout: Next.js dev may need time to compile the print route on first load
+    await page.goto(url, wait_until="load", timeout=60_000)
+    await page.wait_for_selector(selector, timeout=15_000)
     await page.evaluate("document.fonts.ready")
     return await page.pdf(
         format=pdf_format,
@@ -223,6 +224,15 @@ def _raise_playwright_error(error: PlaywrightError, url: str) -> NoReturn:
             f"Please ensure: 1) The frontend is running, "
             f"2) The FRONTEND_BASE_URL environment variable in the backend .env file "
             f"matches the URL where your frontend is accessible."
+        ) from error
+    if "net::ERR_EMPTY_RESPONSE" in error_msg:
+        raise PDFRenderError(
+            f"The frontend closed the connection without sending a response (ERR_EMPTY_RESPONSE). "
+            f"Attempted URL: {url}. "
+            f"This often means: 1) The frontend crashed while rendering the print page, "
+            f"2) The frontend is not running or not reachable at FRONTEND_BASE_URL, "
+            f"3) Next.js dev server is still compiling. Ensure both frontend and backend are running, "
+            f"then try the download again."
         ) from error
     raise PDFRenderError(f"PDF rendering failed: {error_msg}") from error
 

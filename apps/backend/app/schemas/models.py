@@ -177,6 +177,15 @@ class Project(BaseModel):
         return _coerce_string_list(value)
 
 
+AdditionalSectionKey = Literal[
+    "technicalSkills",
+    "languages",
+    "certificationsTraining",
+    "awards",
+    "creativeTools",
+]
+
+
 class AdditionalInfo(BaseModel):
     """Additional information section."""
 
@@ -184,12 +193,22 @@ class AdditionalInfo(BaseModel):
     languages: list[str] = Field(default_factory=list)
     certificationsTraining: list[str] = Field(default_factory=list)
     awards: list[str] = Field(default_factory=list)
+    creativeTools: list[str] = Field(default_factory=list)
+    # Custom order of subsections for display; frontend uses this for sortable Skills layout.
+    additionalSectionOrder: list[AdditionalSectionKey] | None = None
+    # Custom display titles for each subsection; overrides default labels when set.
+    additionalSubsectionLabels: dict[str, str] | None = None
+    # Left column width ratio for Skills two-column layout (0.25–0.75). Default 0.5.
+    skillsLeftColumnRatio: float | None = None
+    # Gap between Skills columns in rem. Default 1.25.
+    skillsColumnGapRem: float | None = None
 
     @field_validator(
         "technicalSkills",
         "languages",
         "certificationsTraining",
         "awards",
+        "creativeTools",
         mode="before",
     )
     @classmethod
@@ -414,6 +433,13 @@ class JobUploadResponse(BaseModel):
     message: str
     job_id: list[str]
     request: dict[str, Any]
+
+
+class JobUploadFromUrlRequest(BaseModel):
+    """Request to create a job from a job posting URL."""
+
+    resume_id: str
+    url: str
 
 
 # Improvement Models

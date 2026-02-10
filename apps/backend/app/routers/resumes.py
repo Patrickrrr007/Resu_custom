@@ -139,7 +139,11 @@ def _raise_improve_error(
     detail: str,
 ) -> NoReturn:
     logger.error("Resume %s failed during %s: %s", action, stage, error)
-    raise HTTPException(status_code=500, detail=detail)
+    # Include stage in response to help debugging (e.g. improve_resume, extract_job_keywords)
+    raise HTTPException(
+        status_code=500,
+        detail=f"{detail} (stage: {stage})",
+    )
 
 
 def _get_original_resume_data(resume: dict[str, Any]) -> dict[str, Any] | None:

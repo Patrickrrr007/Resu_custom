@@ -499,6 +499,34 @@ def calculate_resume_diff(
             confidence="medium"
         ))
 
+    # 4b. Compare creative tools (order changes are intentionally ignored)
+    orig_tools = _build_string_index(
+        original.get("additional", {}).get("creativeTools", []),
+        "additional.creativeTools",
+    )
+    new_tools = _build_string_index(
+        improved.get("additional", {}).get("creativeTools", []),
+        "additional.creativeTools",
+    )
+    orig_tool_keys = set(orig_tools)
+    new_tool_keys = set(new_tools)
+    for tool_key in new_tool_keys - orig_tool_keys:
+        changes.append(ResumeFieldDiff(
+            field_path="additional.creativeTools",
+            field_type="skill",
+            change_type="added",
+            new_value=new_tools[tool_key],
+            confidence="high"
+        ))
+    for tool_key in orig_tool_keys - new_tool_keys:
+        changes.append(ResumeFieldDiff(
+            field_path="additional.creativeTools",
+            field_type="skill",
+            change_type="removed",
+            original_value=orig_tools[tool_key],
+            confidence="medium"
+        ))
+
     # 5. Compare added/removed/modified entries
     # Descriptions are diffed separately; ignore them when detecting entry-level changes.
     _append_entry_changes(

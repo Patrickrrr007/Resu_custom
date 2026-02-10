@@ -66,7 +66,8 @@ RESUME_SCHEMA_EXAMPLE = """{
     "technicalSkills": ["Python", "JavaScript", "AWS", "Docker"],
     "languages": ["English (Native)", "Spanish (Conversational)"],
     "certificationsTraining": ["AWS Solutions Architect"],
-    "awards": ["Employee of the Year 2022"]
+    "awards": ["Employee of the Year 2022"],
+    "creativeTools": ["Figma", "Adobe Creative Suite", "Blender"]
   },
   "customSections": {
     "publications": {
@@ -131,6 +132,29 @@ Extract numeric years (e.g., "5+ years" → 5) and infer seniority level.
 
 Job description:
 {job_description}"""
+
+# Extract job description and requirements from raw web page content
+EXTRACT_JOB_FROM_PAGE_PROMPT = """Extract only the job description and job requirements from the following web page content.
+
+Include:
+- Job title and company (if present)
+- Role description and responsibilities
+- Required and preferred skills, qualifications, experience
+- Any other hiring/application details
+
+Exclude: navigation, footers, cookie notices, unrelated ads, and non-job text.
+
+Output ONLY the extracted job description text. Do not add commentary, headers, or labels."""
+
+# Extract job description from raw HTML (e.g. meta, JSON-LD, initial state)
+EXTRACT_JOB_FROM_HTML_PROMPT = """The following is raw HTML from a job posting page. It may contain JSON-LD (application/ld+json), meta tags (og:description, description), or inline text.
+
+Extract the job description and job requirements from this HTML. Look for:
+- JSON-LD with @type JobPosting
+- meta name="description" or og:description
+- Any visible job title, company, responsibilities, requirements, skills
+
+Output ONLY the extracted job description text. If you find nothing useful, say "No job description found" and nothing else."""
 
 CRITICAL_TRUTHFULNESS_RULES_TEMPLATE = """CRITICAL TRUTHFULNESS RULES - NEVER VIOLATE:
 1. DO NOT add any skill, tool, technology, or certification that is not explicitly mentioned in the original resume

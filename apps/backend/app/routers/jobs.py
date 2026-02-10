@@ -1,11 +1,64 @@
 """Job description management endpoints."""
 
+import logging
+
 from fastapi import APIRouter, HTTPException
 
 from app.database import db
-from app.schemas import JobUploadRequest, JobUploadResponse
+from app.schemas import (
+    JobUploadRequest,
+    JobUploadResponse,
+    JobUploadFromUrlRequest,
+)
+from app.services.job_extract import extract_job_from_url
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/jobs", tags=["Jobs"])
+
+
+@router.post("/upload-from-url", response_model=JobUploadResponse)
+async def upload_job_from_url(
+    request: JobUploadFromUrlRequest,
+) -> JobUploadResponse:
+    """Fetch a job posting URL, extract job description, and create a job.
+
+    Returns job_id for use with resume improve/preview endpoints.
+    """
+    url = (request.url or "").strip()
+    if not url:
+        raise HTTPException(status_code=400, detail="Job URL is required")
+    if not url.startswith(("http://", "https://")):
+        raise HTTPException(
+            status_code=400,
+            detail="URL must start with http:// or https://",
+        )
+
+    try:
+        content = await extract_job_from_url(url)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+    if len(content) < 50:
+        raise HTTPException(
+            status_code=400,
+            detail="Could not extract enough job description from the URL. Please paste the job description instead.",
+        )
+
+    job = db.create_job(
+        content=content,
+        resume_id=request.resume_id,
+    )
+    job_id = job["job_id"]
+
+    return JobUploadResponse(
+        message="Job description extracted and stored",
+        job_id=[job_id],
+        request={
+            "url": request.url,
+            "resume_id": request.resume_id,
+        },
+    )
 
 
 @router.post("/upload", response_model=JobUploadResponse)

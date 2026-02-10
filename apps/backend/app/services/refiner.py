@@ -581,6 +581,9 @@ def _extract_all_text_cached(data_json: str) -> str:
         certs = additional.get("certificationsTraining", [])
         if isinstance(certs, list):
             parts.extend(str(c) for c in certs)
+        tools = additional.get("creativeTools", [])
+        if isinstance(tools, list):
+            parts.extend(str(t) for t in tools)
 
     return " ".join(p for p in parts if p)
 
