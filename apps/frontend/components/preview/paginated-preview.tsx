@@ -41,6 +41,7 @@ export function PaginatedPreview({ resumeData, settings }: PaginatedPreviewProps
       languages: t('resume.additionalLabels.languages'),
       certifications: t('resume.additionalLabels.certifications'),
       awards: t('resume.additionalLabels.awards'),
+      creativeTools: t('resume.additionalLabels.creativeTools'),
     }),
     [t]
   );
@@ -54,6 +55,7 @@ export function PaginatedPreview({ resumeData, settings }: PaginatedPreviewProps
       skills: t('resume.sections.skillsOnly'),
       languages: t('resume.sections.languages'),
       awards: t('resume.sections.awards'),
+      creativeTools: t('resume.sections.creativeTools'),
       links: t('resume.sections.links'),
     }),
     [t]

@@ -51,6 +51,7 @@ export function JDComparisonView({ jobDescription, resumeData }: JDComparisonVie
       resumeData.additional.technicalSkills?.forEach((s) => parts.push(s));
       resumeData.additional.languages?.forEach((l) => parts.push(l));
       resumeData.additional.certificationsTraining?.forEach((c) => parts.push(c));
+      resumeData.additional.creativeTools?.forEach((t) => parts.push(t));
     }
 
     return parts.join(' ');

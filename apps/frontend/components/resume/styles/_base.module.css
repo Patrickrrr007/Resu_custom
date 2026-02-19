@@ -5,6 +5,7 @@
   --section-gap: 1rem;
   --item-gap: 0.25rem;
   --line-height: 1.35;
+  --title-company-gap: 0.5rem;
   --font-size-base: 14px;
   --header-scale: 2;
   --section-header-scale: 1.2;
@@ -32,7 +33,7 @@
 }
 
 .resume-name {
-  font-size: calc(var(--font-size-base) * var(--header-scale));
+  font-size: calc(var(--font-size-base) * var(--name-scale, var(--header-scale)));
   font-family: var(--header-font);
   font-weight: 700;
   color: var(--resume-text-primary);
@@ -104,6 +105,27 @@
   font-family: var(--body-font);
   font-size: calc(var(--font-size-base) * 0.88);
   font-weight: 600;
+  color: var(--resume-text-secondary);
+}
+
+/* Experience: title | company on one line with adjustable gap */
+.resume-item-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.25rem 0;
+}
+
+.resume-item-title-block {
+  display: flex;
+  align-items: baseline;
+  gap: var(--title-company-gap);
+  flex-wrap: wrap;
+}
+
+.resume-item-company {
+  font-weight: 400;
   color: var(--resume-text-secondary);
 }
 

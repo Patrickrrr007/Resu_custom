@@ -671,6 +671,12 @@ class UpdateOutreachMessageRequest(BaseModel):
     content: str
 
 
+class UpdateFilenameRequest(BaseModel):
+    """Request to update resume display name (filename)."""
+
+    filename: str = Field(min_length=1, max_length=255)
+
+
 class ResetDatabaseRequest(BaseModel):
     """Request to reset database with confirmation."""
 

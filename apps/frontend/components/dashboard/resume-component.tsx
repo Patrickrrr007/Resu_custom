@@ -51,11 +51,36 @@ export interface Project {
   description?: string[];
 }
 
+/** Keys for additional (skills) subsections; order can be customized by user. */
+export type AdditionalSectionKey =
+  | 'technicalSkills'
+  | 'languages'
+  | 'certificationsTraining'
+  | 'awards'
+  | 'creativeTools';
+
+export const DEFAULT_ADDITIONAL_SECTION_ORDER: AdditionalSectionKey[] = [
+  'technicalSkills',
+  'languages',
+  'certificationsTraining',
+  'awards',
+  'creativeTools',
+];
+
 export interface AdditionalInfo {
   technicalSkills?: string[];
   languages?: string[];
   certificationsTraining?: string[];
   awards?: string[];
+  creativeTools?: string[];
+  /** Custom order of subsections; when set, display and form use this order. */
+  additionalSectionOrder?: AdditionalSectionKey[];
+  /** Custom display titles for each subsection; when set, overrides default/i18n labels. */
+  additionalSubsectionLabels?: Partial<Record<AdditionalSectionKey, string>>;
+  /** Left column width ratio for Skills two-column layout (0.25–0.75). Default 0.5 = 50/50. */
+  skillsLeftColumnRatio?: number;
+  /** Gap between Skills columns in rem. Default 1.25. */
+  skillsColumnGapRem?: number;
 }
 
 export interface AdditionalSectionLabels {
@@ -63,6 +88,7 @@ export interface AdditionalSectionLabels {
   languages: string;
   certifications: string;
   awards: string;
+  creativeTools: string;
 }
 
 export interface ResumeSectionHeadings {
@@ -74,6 +100,7 @@ export interface ResumeSectionHeadings {
   skills: string;
   languages: string;
   awards: string;
+  creativeTools: string;
   links: string;
 }
 

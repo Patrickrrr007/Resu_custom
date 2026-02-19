@@ -241,6 +241,7 @@ export default function ResumeViewerPage() {
                 languages: t('resume.additionalLabels.languages'),
                 certifications: t('resume.additionalLabels.certifications'),
                 awards: t('resume.additionalLabels.awards'),
+                creativeTools: t('resume.additionalLabels.creativeTools'),
               }}
               sectionHeadings={{
                 summary: t('resume.sections.summary'),
@@ -251,6 +252,7 @@ export default function ResumeViewerPage() {
                 skills: t('resume.sections.skillsOnly'),
                 languages: t('resume.sections.languages'),
                 awards: t('resume.sections.awards'),
+                creativeTools: t('resume.sections.creativeTools'),
                 links: t('resume.sections.links'),
               }}
               fallbackLabels={{ name: t('resume.defaults.name') }}

@@ -15,8 +15,10 @@ import {
   SECTION_SPACING_MAP,
   ITEM_SPACING_MAP,
   LINE_HEIGHT_MAP,
+  TITLE_COMPANY_GAP_MAP,
   FONT_SIZE_MAP,
   HEADER_SCALE_MAP,
+  NAME_SCALE_MAP,
   COMPACT_MULTIPLIER,
   COMPACT_LINE_HEIGHT_MULTIPLIER,
   TEMPLATE_OPTIONS,
@@ -308,6 +310,11 @@ export const FormattingControls: React.FC<FormattingControlsProps> = ({ settings
                 value={settings.spacing.lineHeight}
                 onChange={(v) => handleSpacingChange('lineHeight', v)}
               />
+              <SpacingSelector
+                label={t('builder.formatting.titleCompanyGap')}
+                value={settings.spacing.titleCompanyGap}
+                onChange={(v) => handleSpacingChange('titleCompanyGap', v)}
+              />
             </div>
           </div>
 
@@ -326,6 +333,11 @@ export const FormattingControls: React.FC<FormattingControlsProps> = ({ settings
                 label={t('builder.formatting.headerScale')}
                 value={settings.fontSize.headerScale}
                 onChange={(v) => handleFontChange('headerScale', v)}
+              />
+              <SpacingSelector
+                label={t('builder.formatting.nameScale')}
+                value={settings.fontSize.nameScale}
+                onChange={(v) => handleFontChange('nameScale', v)}
               />
               {/* Header Font Family */}
               <div className="flex items-center gap-2">
@@ -462,6 +474,10 @@ export const FormattingControls: React.FC<FormattingControlsProps> = ({ settings
                   {t('builder.formatting.effectiveItemGap')}: {formatRem(itemGapRem)}
                 </div>
                 <div>
+                  {t('builder.formatting.effectiveTitleCompanyGap')}:{' '}
+                  {TITLE_COMPANY_GAP_MAP[settings.spacing.titleCompanyGap]}
+                </div>
+                <div>
                   {t('builder.formatting.effectiveLineHeight')}: {lineHeightValue.toFixed(2)}
                 </div>
                 <div>
@@ -471,6 +487,10 @@ export const FormattingControls: React.FC<FormattingControlsProps> = ({ settings
                 <div>
                   {t('builder.formatting.effectiveHeaderScale')}:{' '}
                   {HEADER_SCALE_MAP[settings.fontSize.headerScale]}x
+                </div>
+                <div>
+                  {t('builder.formatting.effectiveNameScale')}:{' '}
+                  {NAME_SCALE_MAP[settings.fontSize.nameScale]}x
                 </div>
                 <div>
                   {t('builder.formatting.effectiveHeaderFont')}:{' '}

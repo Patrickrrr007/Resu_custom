@@ -76,6 +76,7 @@ const buildInitialData = (t: Translate): ResumeData => ({
     languages: [],
     certificationsTraining: [],
     awards: [],
+    creativeTools: [],
   },
 });
 
@@ -179,6 +180,11 @@ const ResumeBuilderContent = () => {
     },
     onError: (errorMessage) => {
       console.error('Error during regeneration or applying regenerated changes:', errorMessage);
+
+      if (/rate limit|429/i.test(errorMessage) || errorMessage.includes('429')) {
+        showNotification(t('builder.regenerate.errors.rateLimit'), 'danger');
+        return;
+      }
 
       if (/network|fetch/i.test(errorMessage) || errorMessage.includes('Failed to fetch')) {
         showNotification(t('builder.regenerate.errors.networkError'), 'danger');
@@ -745,7 +751,17 @@ const ResumeBuilderContent = () => {
               {activeTab === 'resume' && (
                 <>
                   <FormattingControls settings={templateSettings} onChange={handleSettingsChange} />
-                  <ResumeForm resumeData={resumeData} onUpdate={handleUpdate} />
+                  <ResumeForm
+                    resumeData={resumeData}
+                    onUpdate={handleUpdate}
+                    nameScale={templateSettings.fontSize.nameScale}
+                    onNameScaleChange={(v) =>
+                      handleSettingsChange({
+                        ...templateSettings,
+                        fontSize: { ...templateSettings.fontSize, nameScale: v },
+                      })
+                    }
+                  />
                 </>
               )}
 

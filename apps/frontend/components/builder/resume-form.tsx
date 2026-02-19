@@ -41,13 +41,22 @@ import {
   DEFAULT_SECTION_META,
 } from '@/lib/utils/section-helpers';
 import { useTranslations } from '@/lib/i18n';
+import type { SpacingLevel } from '@/lib/types/template-settings';
 
 interface ResumeFormProps {
   resumeData: ResumeData;
   onUpdate: (data: ResumeData) => void;
+  /** Name size scale 1–5 for resume header; passed to Personal Info section */
+  nameScale?: SpacingLevel;
+  onNameScaleChange?: (value: SpacingLevel) => void;
 }
 
-export const ResumeForm: React.FC<ResumeFormProps> = ({ resumeData, onUpdate }) => {
+export const ResumeForm: React.FC<ResumeFormProps> = ({
+  resumeData,
+  onUpdate,
+  nameScale,
+  onNameScaleChange,
+}) => {
   const { t } = useTranslations();
 
   // Get section metadata, falling back to defaults
@@ -218,6 +227,8 @@ export const ResumeForm: React.FC<ResumeFormProps> = ({ resumeData, onUpdate }) 
             <PersonalInfoForm
               data={resumeData.personalInfo || ({} as PersonalInfo)}
               onChange={(data) => onUpdate({ ...resumeData, personalInfo: data })}
+              nameScale={nameScale}
+              onNameScaleChange={onNameScaleChange}
             />
           );
 
@@ -262,6 +273,7 @@ export const ResumeForm: React.FC<ResumeFormProps> = ({ resumeData, onUpdate }) 
                   languages: [],
                   certificationsTraining: [],
                   awards: [],
+                  creativeTools: [],
                 }
               }
               onChange={(data) => onUpdate({ ...resumeData, additional: data })}

@@ -5,14 +5,25 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PersonalInfo } from '@/components/dashboard/resume-component';
 import { useTranslations } from '@/lib/i18n';
+import type { SpacingLevel } from '@/lib/types/template-settings';
+import { NAME_SCALE_MAP } from '@/lib/types/template-settings';
 
 interface PersonalInfoFormProps {
   data: PersonalInfo;
   onChange: (data: PersonalInfo) => void;
+  /** Scale 1–5 for resume name font size (e.g. "Chao Kai Lin"); optional so form can be used without builder settings */
+  nameScale?: SpacingLevel;
+  onNameScaleChange?: (value: SpacingLevel) => void;
 }
 
-export const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ data, onChange }) => {
+export const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
+  data,
+  onChange,
+  nameScale,
+  onNameScaleChange,
+}) => {
   const { t } = useTranslations();
+  const levels: SpacingLevel[] = [1, 2, 3, 4, 5];
 
   const handleChange = (field: keyof PersonalInfo, value: string) => {
     onChange({
@@ -57,6 +68,32 @@ export const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ data, onChan
             className="rounded-none border-black focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-blue-700 bg-transparent"
           />
         </div>
+        {nameScale !== undefined && onNameScaleChange && (
+          <div className="md:col-span-2 flex items-center gap-2 flex-wrap">
+            <span className="font-mono text-xs uppercase tracking-wider text-gray-500">
+              {t('builder.formatting.nameScale')}:
+            </span>
+            <div className="flex gap-1">
+              {levels.map((level) => (
+                <button
+                  key={level}
+                  type="button"
+                  onClick={() => onNameScaleChange(level)}
+                  className={`w-6 h-6 font-mono text-xs border transition-all ${
+                    nameScale === level
+                      ? 'bg-blue-700 text-white border-blue-700 shadow-[1px_1px_0px_0px_#000]'
+                      : 'bg-white text-gray-700 border-gray-300 hover:border-black'
+                  }`}
+                >
+                  {level}
+                </button>
+              ))}
+            </div>
+            <span className="font-mono text-[10px] text-gray-400">
+              {NAME_SCALE_MAP[nameScale]}x
+            </span>
+          </div>
+        )}
         <div className="space-y-2">
           <Label
             htmlFor="email"

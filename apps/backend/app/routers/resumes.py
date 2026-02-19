@@ -37,6 +37,7 @@ from app.schemas import (
     RawResume,
     UpdateCoverLetterRequest,
     UpdateOutreachMessageRequest,
+    UpdateFilenameRequest,
     normalize_resume_data,
 )
 from app.services.parser import parse_document, parse_resume_to_json
@@ -1132,6 +1133,19 @@ async def update_outreach_message(
 
     db.update_resume(resume_id, {"outreach_message": request.content})
     return {"message": "Outreach message updated successfully"}
+
+
+@router.patch("/{resume_id}/filename")
+async def update_resume_filename(
+    resume_id: str, request: UpdateFilenameRequest
+) -> dict:
+    """Update the display name (filename) for a resume."""
+    resume = db.get_resume(resume_id)
+    if not resume:
+        raise HTTPException(status_code=404, detail="Resume not found")
+
+    db.update_resume(resume_id, {"filename": request.filename.strip()})
+    return {"message": "Filename updated successfully"}
 
 
 @router.post(

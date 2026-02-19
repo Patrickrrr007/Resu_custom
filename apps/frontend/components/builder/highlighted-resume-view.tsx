@@ -1,7 +1,11 @@
 'use client';
 
 import { useMemo } from 'react';
-import { type ResumeData } from '@/components/dashboard/resume-component';
+import {
+  type ResumeData,
+  type AdditionalSectionKey,
+  DEFAULT_ADDITIONAL_SECTION_ORDER,
+} from '@/components/dashboard/resume-component';
 import { segmentTextByKeywords } from '@/lib/utils/keyword-matcher';
 import { FileUser, Briefcase, GraduationCap, FolderKanban, Wrench } from 'lucide-react';
 import { useTranslations } from '@/lib/i18n';
@@ -124,53 +128,74 @@ export function HighlightedResumeView({ resumeData, keywords }: HighlightedResum
           </Section>
         )}
 
-        {/* Skills */}
-        {resumeData.additional && (
-          <Section title={t('resume.sections.skills')} icon={<Wrench className="w-4 h-4" />}>
-            {resumeData.additional.technicalSkills &&
-              resumeData.additional.technicalSkills.length > 0 && (
-                <div className="mb-3">
-                  <div className="text-xs font-mono uppercase text-gray-500 mb-1">
-                    {t('resume.additional.technicalSkills')}
-                  </div>
-                  <div className="flex flex-wrap gap-1">
-                    {resumeData.additional.technicalSkills.map((skill, i) => (
-                      <SkillTag key={i} text={skill} keywords={keywords} />
-                    ))}
-                  </div>
-                </div>
-              )}
-
-            {resumeData.additional.languages && resumeData.additional.languages.length > 0 && (
-              <div className="mb-3">
-                <div className="text-xs font-mono uppercase text-gray-500 mb-1">
-                  {t('resume.sections.languages')}
-                </div>
-                <div className="flex flex-wrap gap-1">
-                  {resumeData.additional.languages.map((lang, i) => (
-                    <SkillTag key={i} text={lang} keywords={keywords} />
-                  ))}
-                </div>
+        {/* Skills - left bar layout, ordered subsections */}
+        {resumeData.additional &&
+          (() => {
+            const additional = resumeData.additional;
+            const order: AdditionalSectionKey[] =
+              additional.additionalSectionOrder ?? DEFAULT_ADDITIONAL_SECTION_ORDER;
+            const defaultLabels: Record<AdditionalSectionKey, string> = {
+              technicalSkills: t('resume.additional.technicalSkills'),
+              languages: t('resume.sections.languages'),
+              certificationsTraining: t('resume.sections.certifications'),
+              awards: t('resume.sections.awards'),
+              creativeTools: t('resume.sections.creativeTools'),
+            };
+            const labelByKey: Record<AdditionalSectionKey, string> = {
+              technicalSkills:
+                additional.additionalSubsectionLabels?.technicalSkills?.trim() ||
+                defaultLabels.technicalSkills,
+              languages:
+                additional.additionalSubsectionLabels?.languages?.trim() || defaultLabels.languages,
+              certificationsTraining:
+                additional.additionalSubsectionLabels?.certificationsTraining?.trim() ||
+                defaultLabels.certificationsTraining,
+              awards: additional.additionalSubsectionLabels?.awards?.trim() || defaultLabels.awards,
+              creativeTools:
+                additional.additionalSubsectionLabels?.creativeTools?.trim() ||
+                defaultLabels.creativeTools,
+            };
+            const rows = order
+              .map((key) => {
+                const items = additional[key] ?? [];
+                return items.length > 0 ? { key, label: labelByKey[key], items } : null;
+              })
+              .filter(
+                (r): r is { key: AdditionalSectionKey; label: string; items: string[] } =>
+                  r !== null
+              );
+            if (rows.length === 0) return null;
+            const mid = Math.ceil(rows.length / 2);
+            const leftRows = rows.slice(0, mid);
+            const rightRows = rows.slice(mid);
+            const leftRatio = Math.min(
+              0.75,
+              Math.max(0.25, additional.skillsLeftColumnRatio ?? 0.5)
+            );
+            const gapRem = Math.min(2.5, Math.max(0.5, additional.skillsColumnGapRem ?? 1.25));
+            const renderRow = ({ key: rowKey, label, items }: (typeof rows)[number]) => (
+              <div key={rowKey} className="flex gap-2">
+                <span className="font-bold shrink-0 text-gray-700">{label}:</span>
+                <span className="text-gray-700">
+                  <HighlightedText text={items.join(', ')} keywords={keywords} />
+                </span>
               </div>
-            )}
-
-            {resumeData.additional.certificationsTraining &&
-              resumeData.additional.certificationsTraining.length > 0 && (
-                <div className="mb-3">
-                  <div className="text-xs font-mono uppercase text-gray-500 mb-1">
-                    {t('resume.sections.certifications')}
-                  </div>
-                  <ul className="list-disc list-inside space-y-1 text-sm">
-                    {resumeData.additional.certificationsTraining.map((cert, i) => (
-                      <li key={i} className="text-gray-700">
-                        <HighlightedText text={cert} keywords={keywords} />
-                      </li>
-                    ))}
-                  </ul>
+            );
+            return (
+              <Section title={t('resume.sections.skills')} icon={<Wrench className="w-4 h-4" />}>
+                <div
+                  className="border-l-4 border-gray-500 pl-3 grid space-y-1 text-sm"
+                  style={{
+                    gridTemplateColumns: `${leftRatio}fr ${1 - leftRatio}fr`,
+                    columnGap: `${gapRem}rem`,
+                  }}
+                >
+                  <div className="space-y-1">{leftRows.map(renderRow)}</div>
+                  <div className="space-y-1">{rightRows.map(renderRow)}</div>
                 </div>
-              )}
-          </Section>
-        )}
+              </Section>
+            );
+          })()}
       </div>
     </div>
   );
@@ -216,23 +241,6 @@ function HighlightedText({ text, keywords }: { text: string; keywords: Set<strin
           <span key={i}>{segment.text}</span>
         )
       )}
-    </span>
-  );
-}
-
-/**
- * Skill tag with optional highlighting
- */
-function SkillTag({ text, keywords }: { text: string; keywords: Set<string> }) {
-  const isMatch = keywords.has(text.toLowerCase());
-
-  return (
-    <span
-      className={`inline-block px-2 py-0.5 text-xs rounded ${
-        isMatch ? 'bg-yellow-200 text-gray-900 font-medium' : 'bg-gray-100 text-gray-700'
-      }`}
-    >
-      {text}
     </span>
   );
 }

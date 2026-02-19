@@ -17,8 +17,10 @@ import RefreshCw from 'lucide-react/dist/esm/icons/refresh-cw';
 import Plus from 'lucide-react/dist/esm/icons/plus';
 import Settings from 'lucide-react/dist/esm/icons/settings';
 import AlertTriangle from 'lucide-react/dist/esm/icons/alert-triangle';
+import Pencil from 'lucide-react/dist/esm/icons/pencil';
+import { Input } from '@/components/ui/input';
 
-import { fetchResume, fetchResumeList, deleteResume, type ResumeListItem } from '@/lib/api/resume';
+import { fetchResume, fetchResumeList, deleteResume, updateResumeFilename, type ResumeListItem } from '@/lib/api/resume';
 import { useStatusCache } from '@/lib/context/status-cache';
 
 type ProcessingStatus = 'pending' | 'processing' | 'ready' | 'failed' | 'loading';
@@ -29,6 +31,9 @@ export default function DashboardPage() {
   const [processingStatus, setProcessingStatus] = useState<ProcessingStatus>('loading');
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [tailoredResumes, setTailoredResumes] = useState<ResumeListItem[]>([]);
+  const [masterResumeFilename, setMasterResumeFilename] = useState<string | null>(null);
+  const [editingResumeId, setEditingResumeId] = useState<string | null>(null);
+  const [editingValue, setEditingValue] = useState('');
   const router = useRouter();
 
   // Status cache for optimistic counter updates and LLM status check
@@ -97,10 +102,12 @@ export default function DashboardPage() {
       if (resolvedMasterId) {
         localStorage.setItem('master_resume_id', resolvedMasterId);
         setMasterResumeId(resolvedMasterId);
+        setMasterResumeFilename(masterFromList?.filename ?? null);
         checkResumeStatus(resolvedMasterId);
       } else {
         localStorage.removeItem('master_resume_id');
         setMasterResumeId(null);
+        setMasterResumeFilename(null);
       }
 
       const filtered = data.filter((r) => r.resume_id !== resolvedMasterId);
@@ -137,6 +144,31 @@ export default function DashboardPage() {
     e.stopPropagation();
     if (masterResumeId) {
       checkResumeStatus(masterResumeId);
+    }
+  };
+
+  const startEditing = (resumeId: string, currentName: string) => {
+    setEditingResumeId(resumeId);
+    setEditingValue(currentName || '');
+  };
+
+  const cancelEditing = () => {
+    setEditingResumeId(null);
+    setEditingValue('');
+  };
+
+  const saveEditing = async () => {
+    if (!editingResumeId || !editingValue.trim()) {
+      cancelEditing();
+      return;
+    }
+    try {
+      await updateResumeFilename(editingResumeId, editingValue.trim());
+      cancelEditing();
+      loadTailoredResumes();
+    } catch (err) {
+      console.error('Failed to rename resume:', err);
+      cancelEditing();
     }
   };
 
@@ -277,14 +309,25 @@ export default function DashboardPage() {
           <Card
             variant="interactive"
             className="aspect-square h-full"
-            onClick={() => router.push(`/resumes/${masterResumeId}`)}
+            onClick={() => editingResumeId !== masterResumeId && masterResumeId && router.push(`/resumes/${masterResumeId}`)}
           >
             <div className="flex-1 flex flex-col h-full">
               <div className="flex justify-between items-start mb-6">
                 <div className="w-16 h-16 border-2 border-black bg-blue-700 text-white flex items-center justify-center">
                   <span className="font-mono font-bold text-lg">M</span>
                 </div>
-                <div className="flex gap-1">
+                <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+                  {masterResumeId && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 hover:bg-blue-100 hover:text-blue-700 z-10 rounded-none relative"
+                      onClick={() => startEditing(masterResumeId, masterResumeFilename ?? t('dashboard.masterResume'))}
+                      title={t('dashboard.renameResume')}
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </Button>
+                  )}
                   {processingStatus === 'failed' && (
                     <Button
                       variant="ghost"
@@ -299,9 +342,26 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              <CardTitle className="text-lg group-hover:text-primary">
-                {t('dashboard.masterResume')}
-              </CardTitle>
+              {editingResumeId === masterResumeId ? (
+                <div className="space-y-1" onClick={(e) => e.stopPropagation()}>
+                  <Input
+                    className="text-lg font-semibold h-9"
+                    value={editingValue}
+                    onChange={(e) => setEditingValue(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') saveEditing();
+                      if (e.key === 'Escape') cancelEditing();
+                    }}
+                    onBlur={saveEditing}
+                    autoFocus
+                    aria-label={t('dashboard.renameResume')}
+                  />
+                </div>
+              ) : (
+                <CardTitle className="text-lg group-hover:text-primary">
+                  {masterResumeFilename || t('dashboard.masterResume')}
+                </CardTitle>
+              )}
 
               <div
                 className={`text-xs font-mono mt-auto pt-4 flex items-center gap-1 uppercase ${getStatusDisplay().color}`}
@@ -319,20 +379,48 @@ export default function DashboardPage() {
             key={resume.resume_id}
             variant="interactive"
             className="aspect-square h-full bg-canvas"
-            onClick={() => router.push(`/resumes/${resume.resume_id}`)}
+            onClick={() => editingResumeId !== resume.resume_id && router.push(`/resumes/${resume.resume_id}`)}
           >
             <div className="flex-1 flex flex-col">
               <div className="flex justify-between items-start mb-6">
                 <div className="w-12 h-12 border-2 border-black bg-white text-black flex items-center justify-center">
                   <span className="font-mono font-bold">T</span>
                 </div>
-                <span className="font-mono text-xs text-gray-500 uppercase">
-                  {resume.processing_status}
-                </span>
+                <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 hover:bg-gray-100 z-10 rounded-none relative"
+                    onClick={() => startEditing(resume.resume_id, resume.filename ?? t('dashboard.tailoredResume'))}
+                    title={t('dashboard.renameResume')}
+                  >
+                    <Pencil className="w-4 h-4" />
+                  </Button>
+                  <span className="font-mono text-xs text-gray-500 uppercase">
+                    {resume.processing_status}
+                  </span>
+                </div>
               </div>
-              <CardTitle className="text-lg">
-                {resume.filename || t('dashboard.tailoredResume')}
-              </CardTitle>
+              {editingResumeId === resume.resume_id ? (
+                <div className="space-y-1" onClick={(e) => e.stopPropagation()}>
+                  <Input
+                    className="text-lg font-semibold h-9"
+                    value={editingValue}
+                    onChange={(e) => setEditingValue(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') saveEditing();
+                      if (e.key === 'Escape') cancelEditing();
+                    }}
+                    onBlur={saveEditing}
+                    autoFocus
+                    aria-label={t('dashboard.renameResume')}
+                  />
+                </div>
+              ) : (
+                <CardTitle className="text-lg">
+                  {resume.filename || t('dashboard.tailoredResume')}
+                </CardTitle>
+              )}
               <CardDescription className="mt-auto pt-4 uppercase">
                 {t('dashboard.edited', {
                   date: formatDate(resume.updated_at || resume.created_at),

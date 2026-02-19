@@ -48,6 +48,7 @@ from app.schemas.models import (
     StatusResponse,
     UpdateCoverLetterRequest,
     UpdateOutreachMessageRequest,
+    UpdateFilenameRequest,
 )
 
 
@@ -96,6 +97,7 @@ __all__ = [
     "ResetDatabaseRequest",
     "UpdateCoverLetterRequest",
     "UpdateOutreachMessageRequest",
+    "UpdateFilenameRequest",
     "GenerateContentResponse",
     "HealthResponse",
     "StatusResponse",

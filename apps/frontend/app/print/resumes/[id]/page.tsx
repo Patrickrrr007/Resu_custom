@@ -28,6 +28,7 @@ type PageProps = {
     lineHeight?: string;
     fontSize?: string;
     headerScale?: string;
+    nameScale?: string;
     headerFont?: string;
     bodyFont?: string;
     compactMode?: string;
@@ -77,33 +78,40 @@ function parseBoolean(value: string | undefined, defaultValue: boolean): boolean
 }
 
 async function fetchResumeData(id: string): Promise<ResumeData> {
-  const res = await fetch(`${API_BASE}/resumes?resume_id=${encodeURIComponent(id)}`, {
-    cache: 'no-store',
-  });
-  if (!res.ok) {
-    throw new Error(`Failed to load resume (status ${res.status}).`);
-  }
-  const payload = (await res.json()) as {
-    data: { processed_resume?: ResumeData; raw_resume?: { content?: string } };
-  };
-  if (payload.data.processed_resume) {
-    return payload.data.processed_resume;
-  }
-  if (payload.data.raw_resume?.content) {
-    try {
-      return JSON.parse(payload.data.raw_resume.content) as ResumeData;
-    } catch (error) {
-      // Log error for debugging instead of silently failing
-      // Note: Avoid logging content preview to prevent PII exposure
-      console.error('Failed to parse resume JSON:', {
-        resumeId: id,
-        error: error instanceof Error ? error.message : 'Unknown error',
-        contentLength: payload.data.raw_resume.content.length,
-      });
-      throw new Error('Failed to parse resume data. The resume content may be corrupted.');
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 15_000);
+  try {
+    const res = await fetch(`${API_BASE}/resumes?resume_id=${encodeURIComponent(id)}`, {
+      cache: 'no-store',
+      signal: controller.signal,
+    });
+    if (!res.ok) {
+      throw new Error(`Failed to load resume (status ${res.status}).`);
     }
+    const payload = (await res.json()) as {
+      data: { processed_resume?: ResumeData; raw_resume?: { content?: string } };
+    };
+    if (payload.data.processed_resume) {
+      return payload.data.processed_resume;
+    }
+    if (payload.data.raw_resume?.content) {
+      try {
+        return JSON.parse(payload.data.raw_resume.content) as ResumeData;
+      } catch (error) {
+        // Log error for debugging instead of silently failing
+        // Note: Avoid logging content preview to prevent PII exposure
+        console.error('Failed to parse resume JSON:', {
+          resumeId: id,
+          error: error instanceof Error ? error.message : 'Unknown error',
+          contentLength: payload.data.raw_resume.content.length,
+        });
+        throw new Error('Failed to parse resume data. The resume content may be corrupted.');
+      }
+    }
+    return {} as ResumeData;
+  } finally {
+    clearTimeout(timeoutId);
   }
-  return {} as ResumeData;
 }
 
 /**
@@ -154,7 +162,23 @@ function parsePageSize(value: string | undefined): PageSize {
 export default async function PrintResumePage({ params, searchParams }: PageProps) {
   const resolvedParams = await params;
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
-  const resumeData = await fetchResumeData(resolvedParams.id);
+
+  let resumeData: ResumeData;
+  try {
+    resumeData = await fetchResumeData(resolvedParams.id);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Failed to load resume';
+    return (
+      <div className="resume-print bg-white p-8 text-red-600" role="alert">
+        <p className="font-semibold">PDF render error</p>
+        <p className="mt-2 text-sm">{message}</p>
+        <p className="mt-4 text-xs text-gray-500">
+          Ensure the backend is running and reachable at {API_BASE.replace('/api/v1', '')}.
+        </p>
+      </div>
+    );
+  }
+
   const locale = resolveLocale(resolvedSearchParams?.lang);
   const t = (key: string, params?: Record<string, string | number>) =>
     translate(locale, key, params);
@@ -164,6 +188,7 @@ export default async function PrintResumePage({ params, searchParams }: PageProp
     languages: t('resume.additionalLabels.languages'),
     certifications: t('resume.additionalLabels.certifications'),
     awards: t('resume.additionalLabels.awards'),
+    creativeTools: t('resume.additionalLabels.creativeTools'),
   };
   const sectionHeadings = {
     summary: t('resume.sections.summary'),
@@ -174,6 +199,7 @@ export default async function PrintResumePage({ params, searchParams }: PageProp
     skills: t('resume.sections.skillsOnly'),
     languages: t('resume.sections.languages'),
     awards: t('resume.sections.awards'),
+    creativeTools: t('resume.sections.creativeTools'),
     links: t('resume.sections.links'),
   };
   const fallbackLabels = {
@@ -218,6 +244,10 @@ export default async function PrintResumePage({ params, searchParams }: PageProp
       headerScale: parseSpacingLevel(
         resolvedSearchParams?.headerScale,
         DEFAULT_TEMPLATE_SETTINGS.fontSize.headerScale
+      ),
+      nameScale: parseSpacingLevel(
+        resolvedSearchParams?.nameScale,
+        DEFAULT_TEMPLATE_SETTINGS.fontSize.nameScale
       ),
       headerFont: parseHeaderFont(resolvedSearchParams?.headerFont),
       bodyFont: parseBodyFont(resolvedSearchParams?.bodyFont),

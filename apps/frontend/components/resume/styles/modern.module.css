@@ -59,6 +59,11 @@
   widows: 3;
 }
 
+/* Experience: company name in accent color (like link) */
+.resume-item-company {
+  color: var(--resume-accent-primary);
+}
+
 @media print {
   .section-title-accent,
   .section-title-accent-sm {

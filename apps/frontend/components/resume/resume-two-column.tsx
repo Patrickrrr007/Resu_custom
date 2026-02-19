@@ -1,6 +1,11 @@
 import React from 'react';
 import { Mail, Phone, MapPin, Globe, Linkedin, Github, ExternalLink } from 'lucide-react';
-import type { ResumeData, ResumeSectionHeadings } from '@/components/dashboard/resume-component';
+import type {
+  ResumeData,
+  ResumeSectionHeadings,
+  AdditionalSectionKey,
+} from '@/components/dashboard/resume-component';
+import { DEFAULT_ADDITIONAL_SECTION_ORDER } from '@/components/dashboard/resume-component';
 import { getSortedSections, getSectionMeta } from '@/lib/utils/section-helpers';
 import { formatDateRange } from '@/lib/utils';
 import { DynamicResumeSection } from './dynamic-resume-section';
@@ -47,6 +52,7 @@ export const ResumeTwoColumn: React.FC<ResumeTwoColumnProps> = ({
     skills: sectionHeadings?.skills ?? 'Skills',
     languages: sectionHeadings?.languages ?? 'Languages',
     awards: sectionHeadings?.awards ?? 'Awards',
+    creativeTools: sectionHeadings?.creativeTools ?? 'Creative Tools',
     links: sectionHeadings?.links ?? 'Links',
   };
 
@@ -205,24 +211,26 @@ export const ResumeTwoColumn: React.FC<ResumeTwoColumnProps> = ({
                 {workExperience.map((exp) => (
                   <div key={exp.id} className={baseStyles['resume-item']}>
                     <div
-                      className={`flex justify-between items-baseline ${baseStyles['resume-row-tight']}`}
+                      className={`${baseStyles['resume-item-title-row']} ${baseStyles['resume-row-tight']}`}
                     >
-                      <h4 className={baseStyles['resume-item-title-sm']}>{exp.title}</h4>
+                      <div className={baseStyles['resume-item-title-block']}>
+                        <h4 className={baseStyles['resume-item-title-sm']}>{exp.title}</h4>
+                        <span aria-hidden="true">|</span>
+                        <span className={baseStyles['resume-item-company']}>{exp.company}</span>
+                      </div>
                       {exp.years && (
-                        <span className={`${baseStyles['resume-date']} ml-2`}>
+                        <span className={baseStyles['resume-date']}>
                           {formatDateRange(exp.years)}
                         </span>
                       )}
                     </div>
-
-                    <div
-                      className={`flex justify-between items-center ${baseStyles['resume-row-tight']} ${baseStyles['resume-item-subtitle-sm']}`}
-                    >
-                      <span>
-                        {exp.company}
-                        {exp.location && <> • {exp.location}</>}
-                      </span>
-                    </div>
+                    {exp.location && (
+                      <div
+                        className={`${baseStyles['resume-row-tight']} ${baseStyles['resume-item-subtitle-sm']}`}
+                      >
+                        <span>{exp.location}</span>
+                      </div>
+                    )}
 
                     {exp.description && exp.description.length > 0 && (
                       <ul
@@ -395,47 +403,70 @@ export const ResumeTwoColumn: React.FC<ResumeTwoColumnProps> = ({
             </div>
           )}
 
-          {/* Skills Section */}
+          {/* Additional (Skills, Languages, Certifications, Awards, Creative Tools) - single block with left bar */}
           {isSectionVisible('additional') &&
-            additional?.technicalSkills &&
-            additional.technicalSkills.length > 0 && (
-              <div className={baseStyles['resume-section']}>
-                <h3 className={baseStyles['resume-section-title-sm']}>{headingFallbacks.skills}</h3>
-                <div className="flex flex-wrap gap-1">
-                  {additional.technicalSkills.map((skill, index) => (
-                    <span key={index} className={baseStyles['resume-skill-pill']}>
-                      {skill}
-                    </span>
-                  ))}
+            additional &&
+            (() => {
+              const order: AdditionalSectionKey[] =
+                additional.additionalSectionOrder ?? DEFAULT_ADDITIONAL_SECTION_ORDER;
+              const labelByKey: Record<AdditionalSectionKey, string> = {
+                technicalSkills:
+                  additional.additionalSubsectionLabels?.technicalSkills?.trim() ||
+                  headingFallbacks.skills,
+                languages:
+                  additional.additionalSubsectionLabels?.languages?.trim() ||
+                  headingFallbacks.languages,
+                certificationsTraining:
+                  additional.additionalSubsectionLabels?.certificationsTraining?.trim() ||
+                  headingFallbacks.certifications,
+                awards:
+                  additional.additionalSubsectionLabels?.awards?.trim() || headingFallbacks.awards,
+                creativeTools:
+                  additional.additionalSubsectionLabels?.creativeTools?.trim() ||
+                  headingFallbacks.creativeTools,
+              };
+              const rows = order
+                .map((key) => {
+                  const items = additional[key] ?? [];
+                  return items.length > 0 ? { key, label: labelByKey[key], items } : null;
+                })
+                .filter(
+                  (r): r is { key: AdditionalSectionKey; label: string; items: string[] } =>
+                    r !== null
+                );
+              if (rows.length === 0) return null;
+              const mid = Math.ceil(rows.length / 2);
+              const leftRows = rows.slice(0, mid);
+              const rightRows = rows.slice(mid);
+              const leftRatio = Math.min(
+                0.75,
+                Math.max(0.25, additional.skillsLeftColumnRatio ?? 0.5)
+              );
+              const gapRem = Math.min(2.5, Math.max(0.5, additional.skillsColumnGapRem ?? 1.25));
+              const renderRow = ({ key: rowKey, label, items }: (typeof rows)[number]) => (
+                <div key={rowKey} className="flex gap-2">
+                  <span className="font-bold shrink-0">{label}:</span>
+                  <span>{items.join(', ')}</span>
                 </div>
-              </div>
-            )}
-
-          {/* Languages Section */}
-          {isSectionVisible('additional') &&
-            additional?.languages &&
-            additional.languages.length > 0 && (
-              <div className={baseStyles['resume-section']}>
-                <h3 className={baseStyles['resume-section-title-sm']}>
-                  {headingFallbacks.languages}
-                </h3>
-                <p className={baseStyles['resume-text-xs']}>{additional.languages.join(' • ')}</p>
-              </div>
-            )}
-
-          {/* Awards Section */}
-          {isSectionVisible('additional') && additional?.awards && additional.awards.length > 0 && (
-            <div className={baseStyles['resume-section']}>
-              <h3 className={baseStyles['resume-section-title-sm']}>{headingFallbacks.awards}</h3>
-              <ul className={baseStyles['resume-list']}>
-                {additional.awards.map((award, index) => (
-                  <li key={index} className={baseStyles['resume-text-xs']}>
-                    {award}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+              );
+              return (
+                <div className={baseStyles['resume-section']}>
+                  <h3 className={baseStyles['resume-section-title-sm']}>
+                    {headingFallbacks.skills}
+                  </h3>
+                  <div
+                    className={`border-l-4 border-black pl-3 grid ${baseStyles['resume-text-xs']}`}
+                    style={{
+                      gridTemplateColumns: `${leftRatio}fr ${1 - leftRatio}fr`,
+                      columnGap: `${gapRem}rem`,
+                    }}
+                  >
+                    <div className={baseStyles['resume-stack']}>{leftRows.map(renderRow)}</div>
+                    <div className={baseStyles['resume-stack']}>{rightRows.map(renderRow)}</div>
+                  </div>
+                </div>
+              );
+            })()}
 
           {/* Links Section */}
           {personalInfo &&

@@ -27,11 +27,13 @@ export interface SpacingSettings {
   section: SpacingLevel; // Gap between major sections
   item: SpacingLevel; // Gap between items within sections
   lineHeight: SpacingLevel; // Text line height
+  titleCompanyGap: SpacingLevel; // Gap between job title and "| Company" in experience
 }
 
 export interface FontSizeSettings {
   base: SpacingLevel; // Overall text scale
-  headerScale: SpacingLevel; // Header size multiplier
+  headerScale: SpacingLevel; // Section header size multiplier
+  nameScale: SpacingLevel; // Resume name (e.g. "Chao Kai Lin") size multiplier
   headerFont: HeaderFontFamily; // Header font family
   bodyFont: BodyFontFamily; // Body text font family
 }
@@ -54,8 +56,8 @@ export const DEFAULT_TEMPLATE_SETTINGS: TemplateSettings = {
   template: 'swiss-single',
   pageSize: 'A4',
   margins: { top: 10, bottom: 10, left: 10, right: 10 },
-  spacing: { section: 3, item: 2, lineHeight: 3 },
-  fontSize: { base: 3, headerScale: 3, headerFont: 'serif', bodyFont: 'sans-serif' },
+  spacing: { section: 3, item: 2, lineHeight: 3, titleCompanyGap: 2 },
+  fontSize: { base: 3, headerScale: 3, nameScale: 3, headerFont: 'serif', bodyFont: 'sans-serif' },
   compactMode: false,
   showContactIcons: false,
   accentColor: 'blue',
@@ -96,6 +98,15 @@ export const LINE_HEIGHT_MAP: Record<SpacingLevel, number> = {
   5: 1.55, // loose
 };
 
+/** Gap between job title and "| Company" in experience section */
+export const TITLE_COMPANY_GAP_MAP: Record<SpacingLevel, string> = {
+  1: '0.25rem',
+  2: '0.5rem',
+  3: '0.75rem',
+  4: '1rem',
+  5: '1.25rem',
+};
+
 export const FONT_SIZE_MAP: Record<SpacingLevel, string> = {
   1: '11px',
   2: '12px',
@@ -105,6 +116,15 @@ export const FONT_SIZE_MAP: Record<SpacingLevel, string> = {
 };
 
 export const HEADER_SCALE_MAP: Record<SpacingLevel, number> = {
+  1: 1.5,
+  2: 1.75,
+  3: 2, // default
+  4: 2.25,
+  5: 2.5,
+};
+
+// Name (resume title) scale - same range as header scale
+export const NAME_SCALE_MAP: Record<SpacingLevel, number> = {
   1: 1.5,
   2: 1.75,
   3: 2, // default
@@ -180,8 +200,12 @@ export function settingsToCssVars(settings?: TemplateSettings): React.CSSPropert
     '--line-height': s.compactMode
       ? LINE_HEIGHT_MAP[s.spacing.lineHeight] * COMPACT_LINE_HEIGHT_MULTIPLIER
       : LINE_HEIGHT_MAP[s.spacing.lineHeight],
+    '--title-company-gap': s.compactMode
+      ? `calc(${TITLE_COMPANY_GAP_MAP[s.spacing.titleCompanyGap]} * ${compact})`
+      : TITLE_COMPANY_GAP_MAP[s.spacing.titleCompanyGap],
     '--font-size-base': FONT_SIZE_MAP[s.fontSize.base],
     '--header-scale': HEADER_SCALE_MAP[s.fontSize.headerScale],
+    '--name-scale': NAME_SCALE_MAP[s.fontSize.nameScale],
     '--section-header-scale': SECTION_HEADER_SCALE_MAP[s.fontSize.headerScale],
     '--header-font': HEADER_FONT_MAP[s.fontSize.headerFont],
     '--body-font': BODY_FONT_MAP[s.fontSize.bodyFont],

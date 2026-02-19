@@ -254,6 +254,7 @@ export function getResumePdfUrl(
     params.set('lineHeight', String(settings.spacing.lineHeight));
     params.set('fontSize', String(settings.fontSize.base));
     params.set('headerScale', String(settings.fontSize.headerScale));
+    params.set('nameScale', String(settings.fontSize.nameScale));
     params.set('headerFont', settings.fontSize.headerFont);
     params.set('bodyFont', settings.fontSize.bodyFont);
     params.set('compactMode', String(settings.compactMode));
@@ -282,6 +283,22 @@ export async function downloadResumePdf(
     throw new Error(`Failed to download resume (status ${res.status}): ${text}`);
   }
   return await res.blob();
+}
+
+/** Updates the display name (filename) for a resume */
+export async function updateResumeFilename(
+  resumeId: string,
+  filename: string
+): Promise<void> {
+  const trimmed = filename.trim();
+  if (!trimmed) throw new Error('Filename cannot be empty');
+  const res = await apiPatch(`/resumes/${encodeURIComponent(resumeId)}/filename`, {
+    filename: trimmed,
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`Failed to update filename (status ${res.status}): ${text}`);
+  }
 }
 
 /** Deletes a resume by ID */

@@ -43,6 +43,7 @@ export interface AdditionalInfo {
   languages: string[];
   certificationsTraining: string[];
   awards: string[];
+  creativeTools: string[];
 }
 
 export interface ResumeDiffSummary {

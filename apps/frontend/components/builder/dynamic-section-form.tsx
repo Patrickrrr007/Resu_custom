@@ -169,6 +169,7 @@ export const DynamicSectionForm: React.FC<DynamicSectionFormProps> = ({
                   languages: [],
                   certificationsTraining: [],
                   awards: [],
+                  creativeTools: [],
                 }
               }
               onChange={(data) => onUpdate({ ...resumeData, additional: data })}
